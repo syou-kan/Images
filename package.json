@@ -1,0 +1,22 @@
+{
+  "name": "syoukan",
+  "version": "1.0.0",
+  "description": "静态资源文件",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syou-kan/Images.git"
+  },
+  "keywords": [
+    "图床"
+  ],
+  "author": "syoukan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syou-kan/Images/issues"
+  },
+  "homepage": "https://github.com/syou-kan/Images#readme"
+}
