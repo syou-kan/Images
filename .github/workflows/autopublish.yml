@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-      # - main
-      # 注意若分支为main，则请修改后使用
-#    paths-ignore:
-#      - package.json
 
   workflow_dispatch:
 
@@ -32,21 +28,30 @@ jobs:
       - name: Install & Convert
         run: |
           npm install -g webp-batch-convert@0.1.2
-          # 要注意这里的版本号需要添加，如果不添加默认使用@Latest会出现问题
           cwebp-batch --in raw --out webp -q 75 -quiet
-          # npx webp-batch-convert --in raw --out webp -q 75 -quiet
           mv webp/*.webp img/
           
+      # 确保版本号自动增加，并检查增加后的版本号
+      - name: Bump version
+        run: |
+          npm version patch
+          echo "New version: $(node -p "require('./package.json').version")"
+          
       # 发布 NPM 包
-      # 自行修改为自己的Github邮箱地址和用户名
       - name: Publish Package
         run: |
-          git config --global user.email "a848067526@gmail.com"
-          git config --global user.name "syou-kan"
-          npm version patch
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      
+      # 推送版本号变更到GitHub
+      - name: Push Changes
+        run: |
+          git config --global user.email "a848067526@gmail.com"
+          git config --global user.name "syou-kan"
+          git add -A
+          git commit -m "Publish new version"
+          git push origin main
           
       # 删除 raw/ 和 webp/ 下的所有文件
       - name: Delete Files
@@ -55,9 +60,3 @@ jobs:
           rm -rf raw/*
           touch webp/.keep
           touch raw/.keep
-          
-      - name: Push
-        run: |
-          git add -A
-          git commit -m "Publish"
-          git push origin main
