@@ -1,60 +1,59 @@
 name: img2webp & Deploy
-#检测到分支变动就进行提交Actions，2020年10月后github新建仓库默认分支改为main，但是可以修改仓库的默认分支为master，修改方法请自行搜索
 on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
-    # Clone 仓库
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: main
-      # 安装 Node.js    
-      - name: Setup Node
+
+      - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
           node-version: "12.x"
           registry-url: https://registry.npmjs.org/
-        
-      # raw/ 作为原始图片存储，webp/ 作为压缩图片存储处，最后保存转换后的图片到 img/，可以自行修改为对应的文件夹位置
-      # 安装相关插件，转换图片
-      - name: Install & Convert
+
+      # 在进行版本变更前配置Git用户信息
+      - name: Setup Git Identity
+        run: |
+          git config --global user.email "a848067526@gmail.com"
+          git config --global user.name "syou-kan"
+
+      - name: Install & Convert Images
         run: |
           npm install -g webp-batch-convert@0.1.2
           cwebp-batch --in raw --out webp -q 75 -quiet
           mv webp/*.webp img/
           
-      # 确保版本号自动增加，并检查增加后的版本号
-      - name: Bump version
+      # 版本号增加
+      - name: Bump Version
         run: |
           npm version patch
           echo "New version: $(node -p "require('./package.json').version")"
-          
-      # 发布 NPM 包
+
+      # 发布NPM包
       - name: Publish Package
         run: |
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-      
+
       # 推送版本号变更到GitHub
       - name: Push Changes
         run: |
-          git config --global user.email "a848067526@gmail.com"
-          git config --global user.name "syou-kan"
           git add -A
           git commit -m "Publish new version"
           git push origin main
-          
-      # 删除 raw/ 和 webp/ 下的所有文件
-      - name: Delete Files
+
+      # 清理文件
+      - name: Clean Up Files
         run: |
           rm -rf webp/*
           rm -rf raw/*
