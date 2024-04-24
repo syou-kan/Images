@@ -52,10 +52,16 @@ jobs:
           git commit -m "Publish new version"
           git push origin main
 
-      # 清理文件
+            # 清理文件
       - name: Clean Up Files
         run: |
+          echo "Before cleanup:"
+          ls -la raw/
+          ls -la webp/
           rm -rf webp/*
           rm -rf raw/*
           touch webp/.keep
           touch raw/.keep
+          echo "After cleanup:"
+          ls -la raw/
+          ls -la webp/
