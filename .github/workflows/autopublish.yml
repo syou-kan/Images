@@ -27,7 +27,7 @@ jobs:
           node-version: "12.x"
           registry-url: https://registry.npmjs.org/
         
-      # raw/ 作为原始图片存储，webp/ 作为压缩图片存储处，最后保存转换后的图片到 imgs/，可以自行修改为对应的文件夹位置
+      # raw/ 作为原始图片存储，webp/ 作为压缩图片存储处，最后保存转换后的图片到 img/，可以自行修改为对应的文件夹位置
       # 安装相关插件，转换图片
       - name: Install & Convert
         run: |
@@ -35,7 +35,7 @@ jobs:
           # 要注意这里的版本号需要添加，如果不添加默认使用@Latest会出现问题
           cwebp-batch --in raw --out webp -q 75 -quiet
           # npx webp-batch-convert --in raw --out webp -q 75 -quiet
-          mv webp/*.webp imgs/
+          mv webp/*.webp img/
           
       # 发布 NPM 包
       # 自行修改为自己的Github邮箱地址和用户名
