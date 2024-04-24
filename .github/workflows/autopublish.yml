@@ -1,67 +1,32 @@
-name: img2webp & Deploy
+name: Node.js Package
+# 监测图床分支，2020年10月后github新建仓库默认分支改为main，记得更改
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Configure Git
+        run: |
+          git config --global user.name 'a848067526'
+          git config --global user.email 'a848067526@163.com'
+      - uses: actions/setup-node@v4
         with:
-          ref: main
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: "12.x"
+          node-version: 18
           registry-url: https://registry.npmjs.org/
-
-      # 在进行版本变更前配置Git用户信息
-      - name: Setup Git Identity
-        run: |
-          git config --global user.email "a848067526@gmail.com"
-          git config --global user.name "syou-kan"
-
-      - name: Install & Convert Images
-        run: |
-          npm install -g webp-batch-convert@0.1.2
-          cwebp-batch --in raw --out webp -q 75 -quiet
-          mv webp/*.webp img/
-          
-      # 版本号增加
-      - name: Bump Version
-        run: |
-          npm version patch
-          echo "New version: $(node -p "require('./package.json').version")"
-
-      # 发布NPM包
-      - name: Publish Package
-        run: |
-          npm publish
+      - name: Bump version and push tag
+        run: npm version patch -m "Bump version to %s"
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
-      # 推送版本号变更到GitHub
       - name: Push Changes
-        run: |
-          git add -A
-          git commit -m "Publish new version"
-          git push origin main
-
-            # 清理文件
-      - name: Clean Up Files
-        run: |
-          echo "Before cleanup:"
-          ls -la raw/
-          ls -la webp/
-          rm -rf webp/*
-          rm -rf raw/*
-          touch webp/.keep
-          touch raw/.keep
-          echo "After cleanup:"
-          ls -la raw/
-          ls -la webp/
+        run: git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
