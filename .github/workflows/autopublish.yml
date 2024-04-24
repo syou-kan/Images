@@ -9,11 +9,24 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - name: Configure Git
+        run: |
+          git config --global user.name '你的用户名'
+          git config --global user.email '你的电子邮箱'
+      - uses: actions/setup-node@v4
         with:
-          node-version: "12.x"
+          node-version: 18
           registry-url: https://registry.npmjs.org/
+      - name: Bump version and push tag
+        run: npm version patch -m "Bump version to %s"
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+      - name: Push Changes
+        run: git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
